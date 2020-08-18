@@ -6,6 +6,7 @@ edition = "2018"
 
 description = "To be used with all variant, contains the derive macro"
 license = "MIT"
+repository = "https://github.com/TotalKrill/all_variants"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
