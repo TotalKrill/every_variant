@@ -88,7 +88,6 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
             struct FieldGen {
                 name: Ident,
                 ty: TypePath,
-                level: usize,
             };
 
             let name = &it.ident;
@@ -96,17 +95,11 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
             //let mut member_generator = Vec::new();
             let mut fieldgens = Vec::new();
 
-            let mut level = 0;
             for field in &it.fields {
                 //println!("field: {:?}", field);
                 if let Some(name) = field.ident.clone() {
                     if let syn::Type::Path(path) = field.ty.clone() {
-                        let fieldgen = FieldGen {
-                            name: name,
-                            ty: path,
-                            level: level,
-                        };
-                        level += 1;
+                        let fieldgen = FieldGen { name, ty: path };
                         fieldgens.push(fieldgen);
                     }
                 } else {
