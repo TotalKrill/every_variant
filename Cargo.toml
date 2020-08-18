@@ -3,6 +3,13 @@ name = "all_variants"
 version = "0.1.0"
 authors = ["Kristoffer Ödmark <kristoffer.odmark90@gmail.com>"]
 edition = "2018"
+description = """
+Provides an EveryVariant trait that provides the every_variant method on types.
+Allows you to easily generate every combination of variants in structures that contains Enums,
+or in nested enum trees. This to allow for additional testing of codepaths
+"""
+
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

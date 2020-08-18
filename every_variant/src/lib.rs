@@ -10,7 +10,7 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 
 use syn::spanned::Spanned;
-use syn::{Attribute, Ident, Item, LitStr, Meta, TypePath};
+use syn::{Ident, Item, TypePath};
 
 #[proc_macro_derive(EveryVariant)]
 pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
