@@ -15,4 +15,4 @@ license = "MIT"
 
 [dependencies]
 
-every_variant = {path = "./every_variant"}
+every_variant = {version = "0.1.0", path = "./every_variant"}
