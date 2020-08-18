@@ -83,6 +83,19 @@ impl EveryVariant for usize {
     }
 }
 
+impl EveryVariant for f32 {
+    fn every_variant() -> Vec<Self> {
+        let vec = vec![16.32];
+        vec
+    }
+}
+impl EveryVariant for f64 {
+    fn every_variant() -> Vec<Self> {
+        let vec = vec![16.64];
+        vec
+    }
+}
+
 impl<T: EveryVariant + Clone + Sized> EveryVariant for Option<T> {
     fn every_variant() -> Vec<Self> {
         let mut vec = Vec::new();
