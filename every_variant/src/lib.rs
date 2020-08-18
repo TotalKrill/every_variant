@@ -98,7 +98,7 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
 
             let mut level = 0;
             for field in &it.fields {
-                println!("field: {:?}", field);
+                //println!("field: {:?}", field);
                 if let Some(name) = field.ident.clone() {
                     if let syn::Type::Path(path) = field.ty.clone() {
                         let fieldgen = FieldGen {
@@ -148,7 +148,7 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
                 }
             };
 
-            println!("{}", out);
+            //println!("{}", out);
             out.into()
         }
         _ => {
