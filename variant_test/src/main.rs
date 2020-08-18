@@ -4,6 +4,7 @@ use all_variants::*;
 pub struct Message {
     pub message: String,
     pub number: u32,
+    pub opt: Option<u64>,
     pub nest: Top,
     pub second: SecondTop,
 }
@@ -41,6 +42,12 @@ mod test {
     #[test]
     fn messages_number() {
         let msgs = Message::every_variant().len();
-        assert_eq!(20, msgs);
+        assert_eq!(40, msgs);
+    }
+
+    #[test]
+    fn opts_number() {
+        let msgs = Option::<u64>::every_variant().len();
+        assert_eq!(2, msgs);
     }
 }

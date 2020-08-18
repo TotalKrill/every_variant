@@ -101,6 +101,8 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
                     if let syn::Type::Path(path) = field.ty.clone() {
                         let fieldgen = FieldGen { name, ty: path };
                         fieldgens.push(fieldgen);
+                    } else {
+                        field.span().unstable().error("Ident is missing").emit();
                     }
                 } else {
                     field
@@ -121,7 +123,15 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
 
             for field in fieldgens.iter().rev() {
                 let fname = &field.name;
-                let ftype = &field.ty;
+                let mut ftype = field.ty.clone();
+                //println!("type: {}, dbg: {:?}", ftype.to_token_stream(), ftype);
+
+                if let Some(path) = ftype.path.segments.first_mut() {
+                    if let syn::PathArguments::AngleBracketed(ref mut args) = &mut path.arguments {
+                        args.colon2_token = Some(syn::token::Colon2::default());
+                    }
+                }
+
                 structgen = quote! {
                     for #fname in #ftype::every_variant() {
                         #structgen
