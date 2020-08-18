@@ -96,6 +96,13 @@ impl EveryVariant for f64 {
     }
 }
 
+impl EveryVariant for std::num::NonZeroU8 {
+    fn every_variant() -> Vec<Self> {
+        let vec = vec![Self::new(4).unwrap()];
+        vec
+    }
+}
+
 impl<T: EveryVariant + Clone + Sized> EveryVariant for Option<T> {
     fn every_variant() -> Vec<Self> {
         let mut vec = Vec::new();
