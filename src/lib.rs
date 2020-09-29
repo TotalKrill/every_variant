@@ -22,6 +22,7 @@ impl EveryVariant for String {
         vec
     }
 }
+
 impl EveryVariant for &'static str {
     fn every_variant() -> Vec<Self> {
         let vec = vec!["&static str!"];
@@ -147,10 +148,94 @@ impl<T: EveryVariant + Clone + Sized, E: EveryVariant + Clone + Sized> EveryVari
     }
 }
 
+#[cfg(feature = "ev_heapless")]
+use heapless::{ArrayLength, String as HString, Vec as HVec};
+
+#[cfg(feature = "ev_heapless")]
+impl<T, N> EveryVariant for HVec<T, N>
+where
+    T: EveryVariant + Clone + Sized,
+    N: ArrayLength<T>,
+{
+    fn every_variant() -> Vec<Self> {
+        let mut vec = HVec::new();
+
+        for v in T::every_variant() {
+            vec.push(v).ok();
+        }
+
+        vec![vec]
+    }
+}
+
+#[cfg(feature = "ev_heapless")]
+impl<N> EveryVariant for HString<N>
+where
+    N: ArrayLength<u8>,
+{
+    fn every_variant() -> Vec<Self> {
+        let mut s = HString::new();
+        s.push_str("hello").ok();
+        vec![s]
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use crate::EveryVariant;
+    #[cfg(feature = "ev_heapless")]
+    use heapless::{consts::U16, ArrayLength, String as HString, Vec as HVec};
+
     #[test]
     fn it_works() {
         assert_eq!(2 + 2, 4);
+    }
+
+    #[cfg(feature = "ev_heapless")]
+    #[test]
+    fn heapless() {
+        let _s = HString::<U16>::every_variant();
+        let _v = HVec::<u8, U16>::every_variant();
+    }
+
+    #[derive(EveryVariant, Debug, Clone)]
+    pub struct Message {
+        pub message: String,
+        pub number: u32,
+        pub opt: Option<u64>,
+        pub nest: Top,
+        pub second: SecondTop,
+    }
+
+    #[derive(EveryVariant, Debug, Clone)]
+    pub enum SecondTop {
+        One,
+        Two(Nested),
+        Three,
+    }
+
+    #[derive(EveryVariant, Debug, Clone)]
+    pub enum Top {
+        One,
+        Nested(Nested),
+    }
+
+    #[derive(EveryVariant, Debug, Clone)]
+    pub enum Nested {
+        First,
+        Second,
+        Third,
+    }
+
+    #[test]
+    fn messages_number() {
+        let msgs = Message::every_variant().len();
+        assert_eq!(40, msgs);
+    }
+
+    #[test]
+    fn opts_number() {
+        let msgs = Option::<u64>::every_variant().len();
+        assert_eq!(2, msgs);
     }
 }
