@@ -1,5 +1,3 @@
-#![feature(proc_macro_diagnostic)]
-
 //! Proc macros that can help with generating boilerplate code for parsing structures and enums
 //! from topic and payloads from MQTT
 extern crate syn;
@@ -9,7 +7,7 @@ use quote::*;
 extern crate proc_macro;
 use proc_macro::TokenStream;
 
-use syn::spanned::Spanned;
+use proc_macro_error::abort;
 use syn::{Ident, Item, TypePath};
 
 #[proc_macro_derive(EveryVariant)]
@@ -34,11 +32,7 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
                         let f = fields.unnamed.iter();
 
                         if f.count() > 1 {
-                            fields
-                                .span()
-                                .unstable()
-                                .error("Cannot have multiple unnamed fields")
-                                .emit();
+                            abort!(fields, "Cannot have multiple unnamed fields");
                         }
 
                         let field = fields.unnamed.iter().next().unwrap();
@@ -61,10 +55,7 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
                         variant_generators.push(variant_gen);
                     }
                     _ => {
-                        var.span()
-                            .unstable()
-                            .error("Does not support Named fields")
-                            .emit();
+                        abort!(var, "Does not support Named fields");
                     }
                 }
             }
@@ -76,6 +67,14 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
                         let mut vec = Vec::new();
                         #( #variant_generators )*
                         vec
+                    }
+
+                    fn for_every_variant<F: Fn(&Self)>(closure: F) {
+                        let v = Self::every_variant();
+
+                        for elem in &v {
+                            closure(&elem);
+                        }
                     }
 
                 }
@@ -102,14 +101,10 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
                         let fieldgen = FieldGen { name, ty: path };
                         fieldgens.push(fieldgen);
                     } else {
-                        field.span().unstable().error("Ident is missing").emit();
+                        abort!(field, "Ident is missing");
                     }
                 } else {
-                    field
-                        .span()
-                        .unstable()
-                        .error("Does not support unnamed fields yet")
-                        .emit();
+                    abort!(field, "Does not support unnamed fields yet");
                 }
             }
 
@@ -147,7 +142,6 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
                         #structgen
                         vec
                     }
-
                 }
             };
 
@@ -155,11 +149,7 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
             out.into()
         }
         _ => {
-            item.span()
-                .unstable()
-                .warning("Only has an effect on enums and structs")
-                .emit();
-            TokenStream::new()
+            abort!(item, "Only has an effect on enums and structs");
         }
     }
 }
