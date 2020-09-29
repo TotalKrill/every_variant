@@ -184,7 +184,7 @@ where
 mod tests {
     use crate::EveryVariant;
     #[cfg(feature = "ev_heapless")]
-    use heapless::{consts::U16, ArrayLength, String as HString, Vec as HVec};
+    use heapless::{consts::U16, String as HString, Vec as HVec};
 
     #[test]
     fn it_works() {
