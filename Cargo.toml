@@ -15,5 +15,12 @@ repository = "https://github.com/TotalKrill/all_variants"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
 every_variant = {version = "0.1.1", path = "./every_variant"}
+
+[dependencies.heapless]
+version = "0.5"
+optional = true
+
+[features]
+default = []
+ev_heapless = ["heapless"]
