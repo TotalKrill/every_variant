@@ -63,8 +63,8 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
 
             let out = quote! {
                 impl #impl_generics EveryVariant for #name #ty_generics #where_clause {
-                    fn every_variant() -> Vec<Self> {
-                        let mut vec = Vec::new();
+                    fn every_variant() -> std::vec::Vec<Self> {
+                        let mut vec = std::vec::Vec::new();
                         #( #variant_generators )*
                         vec
                     }
@@ -131,14 +131,16 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
                     for #fname in #ftype::every_variant() {
                         #structgen
                     }
-                }
+                };
+
+
             }
 
             let (impl_generics, ty_generics, where_clause) = it.generics.split_for_impl();
             let out = quote! {
                 impl #impl_generics EveryVariant for #name #ty_generics #where_clause {
-                    fn every_variant() -> Vec<Self> {
-                        let mut vec = Vec::new();
+                    fn every_variant() -> std::vec::Vec<Self> {
+                        let mut vec = std::vec::Vec::new();
                         #structgen
                         vec
                     }
