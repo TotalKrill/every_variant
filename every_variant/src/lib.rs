@@ -8,7 +8,25 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 
 use proc_macro_error::{abort, proc_macro_error};
-use syn::{Ident, Item, TypePath};
+use syn::{export::Span, Ident, Item, Type, TypePath};
+
+#[derive(Debug)]
+struct StructFieldGen {
+    name: Ident,
+    ty: TypePath,
+}
+
+#[derive(Debug)]
+struct AnonStructFieldGen {
+    id: Ident,
+    ty: TypePath,
+}
+
+#[derive(Debug)]
+struct EnumFieldGen {
+    id: Ident,
+    ty: Type,
+}
 
 #[proc_macro_error]
 #[proc_macro_derive(EveryVariant)]
@@ -30,22 +48,43 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
 
                 match var.fields {
                     syn::Fields::Unnamed(ref fields) => {
-                        let f = fields.unnamed.iter();
+                        let mut fieldgen = Vec::new();
 
-                        if f.count() > 1 {
-                            abort!(fields, "Cannot have multiple unnamed fields");
+                        for (idx, field) in fields.unnamed.iter().enumerate() {
+                            fieldgen.push(EnumFieldGen {
+                                id: Ident::new(
+                                    &format!("v{}", &idx.to_string()),
+                                    Span::call_site(),
+                                ),
+                                ty: field.ty.clone(),
+                            });
                         }
 
-                        let field = fields.unnamed.iter().next().unwrap();
-                        let field = &field.ty;
+                        let names: Vec<Ident> = fieldgen.iter().map(|f| f.id.clone()).collect();
+                        let mut enumgen = quote! {
+                            let s = #name :: #varid (
+                              #( #names.clone() ),*
+                            );
+                            vec.push(s);
+                        };
+
+                        for field in fieldgen.iter().rev() {
+                            let fname = &field.id;
+                            let ftype = &field.ty;
+
+                            enumgen = quote! {
+                                for #fname in #ftype::every_variant() {
+                                    #enumgen
+                                }
+                            };
+                        }
 
                         let variant_gen = quote! {
-                            for v in #field::every_variant() {
-                                vec.push(Self::#varid(v));
-                            }
+                            #enumgen
                         };
 
                         variant_generators.push(variant_gen);
+
                         //println!("quote: {:?}", layeridarm.to_string());
                     }
                     syn::Fields::Unit => {
@@ -81,60 +120,92 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
                 }
             };
 
-            //println!("{}", out);
+            // println!("{}", out);
             out.into()
         }
         Item::Struct(ref it) => {
-            struct FieldGen {
-                name: Ident,
-                ty: TypePath,
-            };
+            // println!("struct: {:#?}", it);
 
             let name = &it.ident;
 
             //let mut member_generator = Vec::new();
-            let mut fieldgens = Vec::new();
 
-            for field in &it.fields {
-                //println!("field: {:?}", field);
-                if let Some(name) = field.ident.clone() {
+            // This is used, but the compiler does not seem to detect it?
+            #[allow(unused_assignments)]
+            let mut structgen = quote! {};
+
+            if it.fields.iter().any(|f| f.ident.is_none()) {
+                let mut fieldgens = Vec::new();
+                // Here we come if its an struct with anonymous fields
+                for (idx, field) in it.fields.iter().enumerate() {
                     if let syn::Type::Path(path) = field.ty.clone() {
-                        let fieldgen = FieldGen { name, ty: path };
-                        fieldgens.push(fieldgen);
+                        fieldgens.push(AnonStructFieldGen {
+                            id: Ident::new(&format!("v{}", &idx.to_string()), Span::call_site()),
+                            ty: path.clone(),
+                        });
                     } else {
                         abort!(field, "Ident is missing");
                     }
-                } else {
-                    abort!(field, "Does not support unnamed fields yet");
-                }
-            }
-
-            let names: Vec<Ident> = fieldgens.iter().map(|f| f.name.clone()).collect();
-            let mut structgen = quote! {
-                let s = Self {
-                  #( #names: #names.clone() ),*
-                };
-                vec.push(s);
-            };
-
-            for field in fieldgens.iter().rev() {
-                let fname = &field.name;
-                let mut ftype = field.ty.clone();
-                //println!("type: {}, dbg: {:?}", ftype.to_token_stream(), ftype);
-
-                if let Some(path) = ftype.path.segments.first_mut() {
-                    if let syn::PathArguments::AngleBracketed(ref mut args) = &mut path.arguments {
-                        args.colon2_token = Some(syn::token::Colon2::default());
-                    }
                 }
 
+                let names: Vec<Ident> = fieldgens.iter().map(|f| f.id.clone()).collect();
                 structgen = quote! {
-                    for #fname in #ftype::every_variant() {
-                        #structgen
-                    }
+                    let s = #name(
+                      #( #names.clone() ),*
+                    );
+                    vec.push(s);
                 };
 
+                for field in fieldgens.iter().rev() {
+                    let fname = &field.id;
+                    let ftype = &field.ty;
 
+                    structgen = quote! {
+                        for #fname in #ftype::every_variant() {
+                            #structgen
+                        }
+                    };
+                }
+            } else {
+                let mut fieldgens = Vec::new();
+                for field in it.fields.iter() {
+                    if let Some(name) = field.ident.clone() {
+                        if let syn::Type::Path(path) = field.ty.clone() {
+                            let fieldgen = StructFieldGen { name, ty: path };
+                            fieldgens.push(fieldgen);
+                        } else {
+                            abort!(field, "Ident is missing");
+                        }
+                    }
+                }
+
+                let names: Vec<Ident> = fieldgens.iter().map(|f| f.name.clone()).collect();
+                structgen = quote! {
+                    let s = Self {
+                      #( #names: #names.clone() ),*
+                    };
+                    vec.push(s);
+                };
+
+                for field in fieldgens.iter().rev() {
+                    let fname = &field.name;
+                    let mut ftype = field.ty.clone();
+                    //println!("type: {}, dbg: {:?}", ftype.to_token_stream(), ftype);
+
+                    if let Some(path) = ftype.path.segments.first_mut() {
+                        if let syn::PathArguments::AngleBracketed(ref mut args) =
+                            &mut path.arguments
+                        {
+                            args.colon2_token = Some(syn::token::Colon2::default());
+                        }
+                    }
+
+                    structgen = quote! {
+                        for #fname in #ftype::every_variant() {
+                            #structgen
+                        }
+                    };
+                }
             }
 
             let (impl_generics, ty_generics, where_clause) = it.generics.split_for_impl();
@@ -148,7 +219,7 @@ pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
                 }
             };
 
-            //println!("{}", out);
+            // println!("{}", out);
             out.into()
         }
         _ => {

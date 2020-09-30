@@ -82,6 +82,13 @@ impl EveryVariant for i8 {
     }
 }
 
+impl EveryVariant for bool {
+    fn every_variant() -> Vec<Self> {
+        let vec = vec![true, false];
+        vec
+    }
+}
+
 impl EveryVariant for usize {
     fn every_variant() -> Vec<Self> {
         let vec = vec![100];
@@ -227,6 +234,26 @@ mod tests {
         Third,
     }
 
+    #[derive(EveryVariant, Debug, Clone)]
+    pub enum TestUnnamed1 {
+        UnnamedSingle(u16),
+        UnnamedMultiple1(u16, u32),
+        UnnamedMultiple2(u16, u32, u64),
+    }
+
+    #[derive(EveryVariant, Debug, Clone)]
+    pub struct TestUnnamed2(u16, u32, u64);
+
+    // #[derive(EveryVariant, Debug, Clone)]
+    // pub struct Gen<A: EveryVariant + Clone>(A);
+
+    // #[derive(EveryVariant, Debug, Clone)]
+    // pub struct Generic(Gen<u8>);
+
+    #[derive(EveryVariant, Debug, Clone)]
+    pub struct TestUnnamed3(pub u16);
+
+
     #[test]
     fn messages_number() {
         let msgs = Message::every_variant().len();
@@ -237,5 +264,17 @@ mod tests {
     fn opts_number() {
         let msgs = Option::<u64>::every_variant().len();
         assert_eq!(2, msgs);
+    }
+
+    #[test]
+    fn unnamed1() {
+        let msgs = TestUnnamed1::every_variant().len();
+        assert_eq!(3, msgs);
+    }
+
+    #[test]
+    fn unnamed2() {
+        let msgs = TestUnnamed2::every_variant().len();
+        assert_eq!(1, msgs);
     }
 }
