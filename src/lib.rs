@@ -263,11 +263,20 @@ mod tests {
     #[derive(EveryVariant, Debug, Clone)]
     pub struct TestUnnamed2(u16, u32, u64);
 
-    // #[derive(EveryVariant, Debug, Clone)]
-    // pub struct Gen<A: EveryVariant + Clone>(A);
+    #[derive(EveryVariant, Debug, Clone)]
+    pub struct Gen1<A: EveryVariant + Clone>(A);
 
-    // #[derive(EveryVariant, Debug, Clone)]
-    // pub struct Generic(Gen<u8>);
+    #[derive(EveryVariant, Debug, Clone)]
+    pub struct Gen2<A: EveryVariant + Clone, B: EveryVariant + Clone>(A, B);
+
+    #[derive(EveryVariant, Debug, Clone)]
+    pub struct Generic1(Gen1<u8>, Gen2<u16, u32>);
+
+    #[derive(EveryVariant, Debug, Clone)]
+    pub enum Generic2 {
+        G1(Gen1<i8>),
+        G2(Gen2<i16, i32>),
+    }
 
     #[derive(EveryVariant, Debug, Clone)]
     pub struct TestUnnamed3(pub u16);
@@ -294,5 +303,17 @@ mod tests {
     fn unnamed2() {
         let msgs = TestUnnamed2::every_variant().len();
         assert_eq!(1, msgs);
+    }
+
+    #[test]
+    fn generic1() {
+        let msgs = Generic1::every_variant().len();
+        assert_eq!(1, msgs);
+    }
+
+    #[test]
+    fn generic2() {
+        let msgs = Generic2::every_variant().len();
+        assert_eq!(2, msgs);
     }
 }
