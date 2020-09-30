@@ -30,7 +30,7 @@ struct EnumFieldGen {
 
 #[proc_macro_error]
 #[proc_macro_derive(EveryVariant)]
-pub fn mqtt_from_inner_payload(item: TokenStream) -> TokenStream {
+pub fn derive_every_variant(item: TokenStream) -> TokenStream {
     let item: syn::Item = syn::parse(item).expect("Failed to parse input item");
 
     match item {

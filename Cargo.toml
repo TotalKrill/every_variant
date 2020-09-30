@@ -9,6 +9,8 @@ Allows you to easily generate every combination of variants in structures that c
 or in nested enum trees. This to allow for additional testing of codepaths
 """
 
+readme = "README.md"
+
 license = "MIT"
 repository = "https://github.com/TotalKrill/all_variants"
 

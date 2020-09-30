@@ -1,6 +1,6 @@
 pub use every_variant::*;
 
-/// This requires that each underlying structure or nest has this implemented
+/// Trait that supplies a function to generate a vector containing all possible variants in a tree
 pub trait EveryVariant: Sized {
     /// A vector of variants that should contain every possible variant of the struct or enum
     fn every_variant() -> Vec<Self>;
@@ -193,9 +193,28 @@ mod tests {
     #[cfg(feature = "ev_heapless")]
     use heapless::{consts::U16, String as HString, Vec as HVec};
 
+    /// Type of the message
+    #[derive(EveryVariant, Debug, Clone)]
+    enum MessageType {
+        Codified,
+        Markdown,
+        Html,
+    }
+
+    /// This type can come in  4 different variants due the option
+    #[derive(EveryVariant, Debug, Clone)]
+    struct FormattedMessage {
+        /// Enum dictating how to render the string, None means its hidden
+        rendermethod: Option<MessageType>,
+        /// The optional content of the message
+        text: String,
+    }
+
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn small_example() {
+        let all_diferent_messages = FormattedMessage::every_variant();
+        println!("{:#?}", all_diferent_messages);
+        assert_eq!(4, all_diferent_messages.len());
     }
 
     #[cfg(feature = "ev_heapless")]
@@ -252,7 +271,6 @@ mod tests {
 
     #[derive(EveryVariant, Debug, Clone)]
     pub struct TestUnnamed3(pub u16);
-
 
     #[test]
     fn messages_number() {
