@@ -82,6 +82,13 @@ impl EveryVariant for i8 {
     }
 }
 
+impl EveryVariant for bool {
+    fn every_variant() -> Vec<Self> {
+        let vec = vec![true, false];
+        vec
+    }
+}
+
 impl EveryVariant for usize {
     fn every_variant() -> Vec<Self> {
         let vec = vec![100];
