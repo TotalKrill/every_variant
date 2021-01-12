@@ -1,6 +1,6 @@
 [package]
 name = "all_variants"
-version = "0.2.7-alpha.0"
+version = "0.2.8"
 authors = ["Kristoffer Ödmark <kristoffer.odmark90@gmail.com>"]
 edition = "2018"
 description = """
@@ -17,7 +17,7 @@ repository = "https://github.com/TotalKrill/all_variants"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-every_variant = {version = "0.2.0", path = "./every_variant"}
+every_variant = {version = "0.2.1", path = "./every_variant"}
 
 [dependencies.heapless]
 version = "0.5"

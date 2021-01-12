@@ -6,9 +6,10 @@ use quote::*;
 
 extern crate proc_macro;
 use proc_macro::TokenStream;
+use proc_macro2::Span;
 
 use proc_macro_error::{abort, proc_macro_error};
-use syn::{export::Span, Ident, Item, Type, TypePath};
+use syn::{Ident, Item, Type, TypePath};
 
 #[derive(Debug)]
 struct StructFieldGen {
