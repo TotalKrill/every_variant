@@ -156,13 +156,12 @@ impl<T: EveryVariant + Clone + Sized, E: EveryVariant + Clone + Sized> EveryVari
 }
 
 #[cfg(feature = "ev_heapless")]
-use heapless::{ArrayLength, String as HString, Vec as HVec};
+use heapless::{String as HString, Vec as HVec};
 
 #[cfg(feature = "ev_heapless")]
-impl<T, N> EveryVariant for HVec<T, N>
+impl<T, const N: usize> EveryVariant for HVec<T, N>
 where
     T: EveryVariant + Clone + Sized,
-    N: ArrayLength<T>,
 {
     fn every_variant() -> Vec<Self> {
         let mut vec = HVec::new();
@@ -176,10 +175,7 @@ where
 }
 
 #[cfg(feature = "ev_heapless")]
-impl<N> EveryVariant for HString<N>
-where
-    N: ArrayLength<u8>,
-{
+impl<const N: usize> EveryVariant for HString<N> {
     fn every_variant() -> Vec<Self> {
         let mut s = HString::new();
         s.push_str("hello").ok();
@@ -191,7 +187,7 @@ where
 mod tests {
     use crate::EveryVariant;
     #[cfg(feature = "ev_heapless")]
-    use heapless::{consts::U16, String as HString, Vec as HVec};
+    use heapless::{String as HString, Vec as HVec};
 
     /// Type of the message
     #[derive(EveryVariant, Debug, Clone)]
@@ -220,8 +216,8 @@ mod tests {
     #[cfg(feature = "ev_heapless")]
     #[test]
     fn heapless() {
-        let _s = HString::<U16>::every_variant();
-        let _v = HVec::<u8, U16>::every_variant();
+        let _s = HString::<16>::every_variant();
+        let _v = HVec::<u8, 16>::every_variant();
     }
 
     #[derive(EveryVariant, Debug, Clone)]

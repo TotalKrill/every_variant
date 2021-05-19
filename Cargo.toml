@@ -20,7 +20,7 @@ repository = "https://github.com/TotalKrill/all_variants"
 every_variant = {version = "0.2.1", path = "./every_variant"}
 
 [dependencies.heapless]
-version = "0.5"
+version = "0.7.0"
 optional = true
 
 [features]
