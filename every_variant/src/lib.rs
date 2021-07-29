@@ -30,7 +30,7 @@ struct EnumFieldGen {
     name: Option<Ident>,
 }
 
-fn generate_enum_fields(var_id: &Ident, field_data: &Punctuated<Field, Comma>) -> TokenStream2 {
+fn do_enum_gen(var_id: &Ident, field_data: &Punctuated<Field, Comma>) -> TokenStream2 {
     let mut field_gen = Vec::new();
     for (idx, field) in field_data.iter().enumerate() {
         field_gen.push(EnumFieldGen {
@@ -114,7 +114,7 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
 
                 match var.fields {
                     syn::Fields::Unnamed(ref fields) => {
-                        let variant_gen = generate_enum_fields(&varid, &fields.unnamed);
+                        let variant_gen = do_enum_gen(&varid, &fields.unnamed);
                         variant_generators.push(variant_gen);
                         //println!("quote: {:?}", layeridarm.to_string());
                     }
@@ -126,7 +126,7 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
                         variant_generators.push(variant_gen);
                     }
                     syn::Fields::Named(ref fields) => {
-                        let variant_gen = generate_enum_fields(&varid, &fields.named);
+                        let variant_gen = do_enum_gen(&varid, &fields.named);
                         variant_generators.push(variant_gen);
                     }
                 }
