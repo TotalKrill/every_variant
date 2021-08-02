@@ -1,4 +1,4 @@
-pub use every_variant::*;
+pub use every_variant_macro::*;
 
 /// Trait that supplies a function to generate a vector containing all possible variants in a tree
 pub trait EveryVariant: Sized {
