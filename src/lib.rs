@@ -257,6 +257,13 @@ mod tests {
     }
 
     #[derive(EveryVariant, Debug, Clone)]
+    pub enum TestNamed1 {
+        NamedSingle { first: u16 },
+        NamedMultiple1 { first: u16, second: u32 },
+        NamedMultiple2 { first: u16, second: u32, third: u64 },
+    }
+
+    #[derive(EveryVariant, Debug, Clone)]
     pub struct TestUnnamed2(u16, u32, u64);
 
     #[derive(EveryVariant, Debug, Clone)]
@@ -311,5 +318,11 @@ mod tests {
     fn generic2() {
         let msgs = Generic2::every_variant().len();
         assert_eq!(2, msgs);
+    }
+
+    #[test]
+    fn named_enum() {
+        let msgs = TestNamed1::every_variant().len();
+        assert_eq!(3, msgs);
     }
 }

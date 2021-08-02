@@ -6,10 +6,10 @@ use quote::*;
 
 extern crate proc_macro;
 use proc_macro::TokenStream;
-use proc_macro2::Span;
+use proc_macro2::{Span, TokenStream as TokenStream2};
 
 use proc_macro_error::{abort, proc_macro_error};
-use syn::{Ident, Item, Type, TypePath};
+use syn::{punctuated::Punctuated, token::Comma, Field, Ident, Item, Type, TypePath};
 
 #[derive(Debug)]
 struct StructFieldGen {
@@ -27,6 +27,71 @@ struct AnonStructFieldGen {
 struct EnumFieldGen {
     id: Ident,
     ty: Type,
+    name: Option<Ident>,
+}
+
+fn do_enum_gen(var_id: &Ident, field_data: &Punctuated<Field, Comma>) -> TokenStream2 {
+    let mut field_gen = Vec::new();
+    for (idx, field) in field_data.iter().enumerate() {
+        field_gen.push(EnumFieldGen {
+            id: Ident::new(&format!("v{}", &idx.to_string()), Span::call_site()),
+            ty: field.ty.clone(),
+            name: field.ident.clone(),
+        });
+    }
+
+    let mut named_fields = false;
+
+    let names: Vec<TokenStream2> = field_gen
+        .iter()
+        .map(|field_gen| {
+            let field_id = &field_gen.id;
+            let field_name = &field_gen.name;
+            if let Some(field_name) = field_name {
+                named_fields = true;
+                quote! {
+                    #field_name: #field_id
+                }
+            } else {
+                quote! {
+                    #field_id
+                }
+            }
+        })
+        .collect();
+
+    let mut enum_gen = if !named_fields {
+        quote! {
+            let s = Self :: #var_id (
+              #( #names.clone() ),*
+            );
+            vec.push(s);
+        }
+    } else {
+        quote! {
+            let s = Self :: #var_id {
+              #( #names.clone() ),*
+            };
+            vec.push(s);
+        }
+    };
+
+    for field in field_gen.iter().rev() {
+        let fname = &field.id;
+        let ftype = &field.ty;
+
+        enum_gen = quote! {
+            for #fname in <#ftype as EveryVariant>::every_variant() {
+                #enum_gen
+            }
+        };
+    }
+
+    let variant_gen = quote! {
+        #enum_gen
+    };
+
+    variant_gen
 }
 
 #[proc_macro_error]
@@ -49,43 +114,8 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
 
                 match var.fields {
                     syn::Fields::Unnamed(ref fields) => {
-                        let mut fieldgen = Vec::new();
-
-                        for (idx, field) in fields.unnamed.iter().enumerate() {
-                            fieldgen.push(EnumFieldGen {
-                                id: Ident::new(
-                                    &format!("v{}", &idx.to_string()),
-                                    Span::call_site(),
-                                ),
-                                ty: field.ty.clone(),
-                            });
-                        }
-
-                        let names: Vec<Ident> = fieldgen.iter().map(|f| f.id.clone()).collect();
-                        let mut enumgen = quote! {
-                            let s = #name :: #varid (
-                              #( #names.clone() ),*
-                            );
-                            vec.push(s);
-                        };
-
-                        for field in fieldgen.iter().rev() {
-                            let fname = &field.id;
-                            let ftype = &field.ty;
-
-                            enumgen = quote! {
-                                for #fname in <#ftype as EveryVariant>::every_variant() {
-                                    #enumgen
-                                }
-                            };
-                        }
-
-                        let variant_gen = quote! {
-                            #enumgen
-                        };
-
+                        let variant_gen = do_enum_gen(&varid, &fields.unnamed);
                         variant_generators.push(variant_gen);
-
                         //println!("quote: {:?}", layeridarm.to_string());
                     }
                     syn::Fields::Unit => {
@@ -95,8 +125,9 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
                         };
                         variant_generators.push(variant_gen);
                     }
-                    _ => {
-                        abort!(var, "Does not support Named fields");
+                    syn::Fields::Named(ref fields) => {
+                        let variant_gen = do_enum_gen(&varid, &fields.named);
+                        variant_generators.push(variant_gen);
                     }
                 }
             }
