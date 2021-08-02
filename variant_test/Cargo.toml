@@ -8,5 +8,4 @@ edition = "2018"
 
 [dependencies]
 
-every_variant = {path="../every_variant"}
-all_variants = {path = "../"}
+every_variant = {path = "../"}

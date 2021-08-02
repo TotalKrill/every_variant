@@ -1,4 +1,4 @@
-use all_variants::*;
+use every_variant::*;
 
 #[derive(EveryVariant, Debug, Clone)]
 pub struct Message {
