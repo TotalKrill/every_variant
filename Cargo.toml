@@ -12,7 +12,7 @@ or in nested enum trees. This to allow for additional testing of codepaths
 readme = "README.md"
 
 license = "MIT"
-repository = "https://github.com/TotalKrill/all_variants"
+repository = "https://github.com/TotalKrill/every_variant"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
