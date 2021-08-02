@@ -1,4 +1,4 @@
-# all-variants
+# every_variant
 
 Provides an EveryVariant trait that provides the every_variant() method on
 types. Allows you to easily generate every combination of variants in
