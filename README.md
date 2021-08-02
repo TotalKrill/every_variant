@@ -17,7 +17,7 @@ on the strings for example, I suggest that those be made into their own types an
 
 ``` rust
 
-use all_variants::EveryVariant;
+use every_variant::EveryVariant;
 
 /// Type of the message
 #[derive(EveryVariant, Debug, Clone)]
