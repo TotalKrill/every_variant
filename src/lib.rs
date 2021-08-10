@@ -284,6 +284,23 @@ mod tests {
     #[derive(EveryVariant, Debug, Clone)]
     pub struct TestUnnamed3(pub u16);
 
+    #[allow(unused)]
+    #[derive(EveryVariant)]
+    pub struct GenericDerive<T> {
+        value: T,
+    }
+
+    #[allow(unused)]
+    #[derive(EveryVariant)]
+    pub enum GenericEnum<T> {
+        One(T),
+        Two(u32),
+    }
+
+    #[allow(unused)]
+    #[derive(EveryVariant)]
+    pub struct MultiGeneric<A, B>(A, B);
+
     #[test]
     fn messages_number() {
         let msgs = Message::every_variant().len();
@@ -324,5 +341,17 @@ mod tests {
     fn named_enum() {
         let msgs = TestNamed1::every_variant().len();
         assert_eq!(3, msgs);
+    }
+
+    #[test]
+    fn generic_everyvariant() {
+        let msgs = GenericDerive::<u32>::every_variant().len();
+        assert_eq!(1, msgs);
+
+        let msgs = GenericEnum::<u32>::every_variant().len();
+        assert_eq!(2 * 1, msgs);
+
+        let msgs = MultiGeneric::<u32, u32>::every_variant().len();
+        assert_eq!(1, msgs);
     }
 }

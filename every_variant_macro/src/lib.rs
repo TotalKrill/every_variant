@@ -1,5 +1,5 @@
-//! Proc macros that can help with generating boilerplate code for parsing structures and enums
-//! from topic and payloads from MQTT
+//! Proc macros that can help with generating implements of
+//! the EveryVariant trait for structs and enums
 extern crate syn;
 
 use quote::*;
@@ -9,7 +9,10 @@ use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 
 use proc_macro_error::{abort, proc_macro_error};
-use syn::{punctuated::Punctuated, token::Comma, Field, Ident, Item, Type, TypePath};
+use syn::{
+    punctuated::Punctuated, token::Comma, Field, GenericParam, Generics, Ident, Item, TraitBound,
+    TraitBoundModifier, Type, TypeParamBound, TypePath,
+};
 
 #[derive(Debug)]
 struct StructFieldGen {
@@ -94,6 +97,35 @@ fn do_enum_gen(var_id: &Ident, field_data: &Punctuated<Field, Comma>) -> TokenSt
     variant_gen
 }
 
+fn do_bound_gen(generics: &Generics) -> Generics {
+    let mut generics = generics.clone();
+
+    fn make_bound(name: &str) -> TypeParamBound {
+        TypeParamBound::Trait(TraitBound {
+            paren_token: None,
+            modifier: TraitBoundModifier::None,
+            lifetimes: None,
+            path: Ident::new(name, Span::call_site()).into(),
+        })
+    }
+
+    let everyvariant_bound = make_bound("EveryVariant");
+    let clone_bound = make_bound("Clone");
+    let sized_bound = make_bound("Sized");
+
+    for param in &mut generics.params {
+        match param {
+            GenericParam::Type(some_type) => {
+                some_type.bounds.push(everyvariant_bound.clone());
+                some_type.bounds.push(clone_bound.clone());
+                some_type.bounds.push(sized_bound.clone());
+            }
+            _ => {}
+        }
+    }
+    generics
+}
+
 #[proc_macro_error]
 #[proc_macro_derive(EveryVariant)]
 pub fn derive_every_variant(item: TokenStream) -> TokenStream {
@@ -131,7 +163,9 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
                     }
                 }
             }
-            let (impl_generics, ty_generics, where_clause) = it.generics.split_for_impl();
+
+            let bounded_generics = do_bound_gen(&it.generics);
+            let (impl_generics, ty_generics, where_clause) = bounded_generics.split_for_impl();
 
             let out = quote! {
                 impl #impl_generics EveryVariant for #name #ty_generics #where_clause {
@@ -232,7 +266,9 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
                 }
             }
 
-            let (impl_generics, ty_generics, where_clause) = it.generics.split_for_impl();
+            let bounded_generics = do_bound_gen(&it.generics);
+            let (impl_generics, ty_generics, where_clause) = bounded_generics.split_for_impl();
+
             let out = quote! {
                 impl #impl_generics EveryVariant for #name #ty_generics #where_clause {
                     fn every_variant() -> std::vec::Vec<Self> {
