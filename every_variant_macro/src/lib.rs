@@ -1,5 +1,5 @@
-//! Proc macros that can help with generating boilerplate code for parsing structures and enums
-//! from topic and payloads from MQTT
+//! Proc macros that can help with generating implements of
+//! the EveryVariant trait for structs and enums
 extern crate syn;
 
 use quote::*;
