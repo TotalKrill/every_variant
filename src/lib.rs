@@ -155,6 +155,18 @@ impl<T: EveryVariant + Clone + Sized, E: EveryVariant + Clone + Sized> EveryVari
     }
 }
 
+impl<T: EveryVariant + Clone + Sized> EveryVariant for Vec<T> {
+    fn every_variant() -> Vec<Self> {
+        let mut vec = vec![];
+
+        for v in T::every_variant() {
+            vec.push(v);
+        }
+
+        vec![vec]
+    }
+}
+
 #[cfg(feature = "ev_heapless")]
 use heapless::{String as HString, Vec as HVec};
 
