@@ -16,6 +16,9 @@ impl EveryVariant for String {
         // add a string with special chars
         vec.push(String::from("!\"¤%!#/&/(^^ÄÖ"));
 
+        // add a only numbers string
+        vec.push(String::from("25"));
+
         // null
         vec.push(String::from("null"));
 
@@ -234,7 +237,11 @@ mod tests {
     fn small_example() {
         let all_diferent_messages = FormattedMessage::every_variant();
         println!("{:#?}", all_diferent_messages);
-        assert_eq!(4, all_diferent_messages.len());
+
+        let opt_msg_len = Option::<MessageType>::every_variant().len();
+        let text_len = String::every_variant().len();
+
+        assert_eq!(opt_msg_len * text_len, all_diferent_messages.len());
     }
 
     #[cfg(feature = "ev_heapless")]
@@ -274,21 +281,60 @@ mod tests {
     }
 
     #[derive(EveryVariant, Debug, Clone)]
-    pub enum TestUnnamed1 {
-        UnnamedSingle(u16),
-        UnnamedMultiple1(u16, u32),
-        UnnamedMultiple2(u16, u32, u64),
+    pub struct TestUnnamed3(pub u16);
+
+    #[test]
+    fn messages_number() {
+        let msgs = Message::every_variant().len();
+        let messages_len = String::every_variant().len();
+        let number_len = u32::every_variant().len();
+        let opt_len = Option::<u64>::every_variant().len();
+        let nest_len = Top::every_variant().len();
+        let second_len = SecondTop::every_variant().len();
+
+        assert_eq!(
+            (messages_len * number_len * opt_len * nest_len * second_len),
+            msgs
+        );
+    }
+
+    #[test]
+    fn opts_number() {
+        let msgs = Option::<u64>::every_variant().len();
+        assert_eq!(u64::every_variant().len() + 1, msgs);
     }
 
     #[derive(EveryVariant, Debug, Clone)]
-    pub enum TestNamed1 {
-        NamedSingle { first: u16 },
-        NamedMultiple1 { first: u16, second: u32 },
-        NamedMultiple2 { first: u16, second: u32, third: u64 },
+    pub enum TestUnnamed1 {
+        UnnamedSingle(u16),
+        UnnamedMultiple1(u16, u32),
+        UnnamedMultiple2(u16, u32, u64, i32),
+    }
+
+    #[test]
+    fn unnamed1() {
+        let msgs = TestUnnamed1::every_variant().len();
+        let u16_len = u16::every_variant().len();
+        let u32_len = u32::every_variant().len();
+        let u64_len = u64::every_variant().len();
+        let i32_len = i32::every_variant().len();
+        assert_eq!(
+            u16_len + u16_len * u32_len + u16_len * u32_len * u64_len * i32_len,
+            msgs
+        );
     }
 
     #[derive(EveryVariant, Debug, Clone)]
     pub struct TestUnnamed2(u16, u32, u64);
+
+    #[test]
+    fn unnamed2() {
+        let msgs = TestUnnamed2::every_variant().len();
+        let u16_len = u16::every_variant().len();
+        let u32_len = u32::every_variant().len();
+        let u64_len = u64::every_variant().len();
+        assert_eq!(u16_len * u32_len * u64_len, msgs);
+    }
 
     #[derive(EveryVariant, Debug, Clone)]
     pub struct Gen1<A: EveryVariant + Clone>(A);
@@ -298,6 +344,15 @@ mod tests {
 
     #[derive(EveryVariant, Debug, Clone)]
     pub struct Generic1(Gen1<u8>, Gen2<u16, u32>);
+    #[test]
+    fn generic1() {
+        let msgs = Generic1::every_variant().len();
+
+        let gen1_len = Gen1::<u8>::every_variant().len();
+        let gen2_len = Gen2::<u16, u32>::every_variant().len();
+
+        assert_eq!(gen1_len * gen2_len, msgs);
+    }
 
     #[derive(EveryVariant, Debug, Clone)]
     pub enum Generic2 {
@@ -305,8 +360,32 @@ mod tests {
         G2(Gen2<i16, i32>),
     }
 
+    #[test]
+    fn generic2() {
+        let msgs = Generic2::every_variant().len();
+        let gen1_len = Gen1::<i8>::every_variant().len();
+        let gen2_len = Gen2::<i16, i32>::every_variant().len();
+        assert_eq!(gen1_len + gen2_len, msgs);
+    }
+
     #[derive(EveryVariant, Debug, Clone)]
-    pub struct TestUnnamed3(pub u16);
+    pub enum TestNamed1 {
+        NamedSingle { first: u16 },
+        NamedMultiple1 { first: u16, second: u32 },
+        NamedMultiple2 { first: u16, second: u32, third: u64 },
+    }
+
+    #[test]
+    fn named_enum() {
+        let msgs = TestNamed1::every_variant().len();
+        let u16_len = u16::every_variant().len();
+        let u32_len = u32::every_variant().len();
+        let u64_len = u64::every_variant().len();
+        assert_eq!(
+            u16_len + u16_len * u32_len + u16_len * u32_len * u64_len,
+            msgs
+        );
+    }
 
     #[allow(unused)]
     #[derive(EveryVariant)]
@@ -326,56 +405,17 @@ mod tests {
     pub struct MultiGeneric<A, B>(A, B);
 
     #[test]
-    fn messages_number() {
-        let msgs = Message::every_variant().len();
-        assert_eq!(40, msgs);
-    }
-
-    #[test]
-    fn opts_number() {
-        let msgs = Option::<u64>::every_variant().len();
-        assert_eq!(2, msgs);
-    }
-
-    #[test]
-    fn unnamed1() {
-        let msgs = TestUnnamed1::every_variant().len();
-        assert_eq!(3, msgs);
-    }
-
-    #[test]
-    fn unnamed2() {
-        let msgs = TestUnnamed2::every_variant().len();
-        assert_eq!(1, msgs);
-    }
-
-    #[test]
-    fn generic1() {
-        let msgs = Generic1::every_variant().len();
-        assert_eq!(1, msgs);
-    }
-
-    #[test]
-    fn generic2() {
-        let msgs = Generic2::every_variant().len();
-        assert_eq!(2, msgs);
-    }
-
-    #[test]
-    fn named_enum() {
-        let msgs = TestNamed1::every_variant().len();
-        assert_eq!(3, msgs);
-    }
-
-    #[test]
     fn generic_everyvariant() {
         let msgs = GenericDerive::<u32>::every_variant().len();
-        assert_eq!(1, msgs);
+        assert_eq!(u32::every_variant().len(), msgs);
 
         let msgs = GenericEnum::<u32>::every_variant().len();
-        assert_eq!(2 * 1, msgs);
+        assert_eq!(2 * u32::every_variant().len(), msgs);
 
         let msgs = MultiGeneric::<u32, u32>::every_variant().len();
-        assert_eq!(1, msgs);
+        assert_eq!(
+            u32::every_variant().len() * u32::every_variant().len(),
+            msgs
+        );
     }
 }
