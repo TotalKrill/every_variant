@@ -17,7 +17,7 @@ repository = "https://github.com/TotalKrill/every_variant"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-every_variant_macro = {version = "0.3.0", path = "./every_variant_macro"}
+every_variant_macro = {version = "0.3.1", path = "./every_variant_macro"}
 
 [dependencies.heapless]
 version = "0.7.0"
