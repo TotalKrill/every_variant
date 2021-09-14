@@ -276,6 +276,14 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
                         #structgen
                         vec
                     }
+
+                    fn for_every_variant<F: Fn(&Self)>(closure: F) {
+                        let v = Self::every_variant();
+
+                        for elem in &v {
+                            closure(&elem);
+                        }
+                    }
                 }
             };
 
