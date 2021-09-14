@@ -166,17 +166,21 @@ impl<T: EveryVariant + Clone + Sized> EveryVariant for Vec<T> {
         // add an empty vector
         retvec.push(Vec::new());
 
-        let single_variant = T::every_variant().first().cloned().unwrap();
-        // add a single element vector
-        let singlevec = vec![single_variant.clone()];
-        retvec.push(singlevec);
+        match T::every_variant().first().cloned() {
+            Some(value) => {
+                // add a single element vector
+                let singlevec = vec![value.clone()];
+                retvec.push(singlevec);
 
-        // add a large vector
-        let mut largevec = Vec::new();
-        while largevec.len() < 1000000 {
-            largevec.push(single_variant.clone());
-        }
-        retvec.push(largevec);
+                // add a multi-element vector
+                let mut largevec = Vec::new();
+                while largevec.len() < 10 {
+                    largevec.push(value.clone());
+                }
+                retvec.push(largevec);
+            }
+            None => {}
+        };
 
         retvec
     }
