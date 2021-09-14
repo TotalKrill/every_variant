@@ -8,21 +8,7 @@ use crate::*;
 
 impl EveryVariant for String {
     fn every_variant() -> Vec<Self> {
-        let mut vec = vec!["example String".into()];
-
-        // add an empty string
-        vec.push(String::new());
-
-        // add a string with special chars
-        vec.push(String::from("!\"¤%!#/&/(^^ÄÖ"));
-
-        // add a only numbers string
-        vec.push(String::from("25"));
-
-        // null
-        vec.push(String::from("null"));
-
-        vec
+        vec!["example String".into()]
     }
 }
 
@@ -35,52 +21,52 @@ impl EveryVariant for &'static str {
 
 impl EveryVariant for u32 {
     fn every_variant() -> Vec<Self> {
-        let vec = vec![0, 1, 43, u32::MAX];
+        let vec = vec![32];
         vec
     }
 }
 
 impl EveryVariant for u64 {
     fn every_variant() -> Vec<Self> {
-        let vec = vec![0, 1, 43, u64::MAX];
+        let vec = vec![64];
         vec
     }
 }
 impl EveryVariant for u16 {
     fn every_variant() -> Vec<Self> {
-        let vec = vec![0, 1, 43, u16::MAX];
+        let vec = vec![16];
         vec
     }
 }
 impl EveryVariant for u8 {
     fn every_variant() -> Vec<Self> {
-        let vec = vec![0, 1, 43, u8::MAX];
+        let vec = vec![8];
         vec
     }
 }
 
 impl EveryVariant for i32 {
     fn every_variant() -> Vec<Self> {
-        let vec = vec![i32::MIN, -1, 0, 1, i32::MAX];
+        let vec = vec![-32];
         vec
     }
 }
 
 impl EveryVariant for i64 {
     fn every_variant() -> Vec<Self> {
-        let vec = vec![i64::MIN, -1, 0, 1, i64::MAX];
+        let vec = vec![-64];
         vec
     }
 }
 impl EveryVariant for i16 {
     fn every_variant() -> Vec<Self> {
-        let vec = vec![i16::MIN, -1, 0, 1, i16::MAX];
+        let vec = vec![-16];
         vec
     }
 }
 impl EveryVariant for i8 {
     fn every_variant() -> Vec<Self> {
-        let vec = vec![i8::MIN, -1, 0, 1, i8::MAX];
+        let vec = vec![-8];
         vec
     }
 }
@@ -94,20 +80,20 @@ impl EveryVariant for bool {
 
 impl EveryVariant for usize {
     fn every_variant() -> Vec<Self> {
-        let vec = vec![0, 1, usize::MAX];
+        let vec = vec![usize::MAX];
         vec
     }
 }
 
 impl EveryVariant for f32 {
     fn every_variant() -> Vec<Self> {
-        let vec = vec![f32::MIN, -1.0, 0.0, 1.0, f32::MAX, f32::NAN];
+        let vec = vec![32.];
         vec
     }
 }
 impl EveryVariant for f64 {
     fn every_variant() -> Vec<Self> {
-        let vec = vec![f64::MIN, -1.0, 0.0, 1.0, f64::MAX, f64::NAN];
+        let vec = vec![64.];
         vec
     }
 }
