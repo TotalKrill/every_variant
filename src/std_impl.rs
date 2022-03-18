@@ -6,104 +6,75 @@ use crate::*;
 // There are infinite numbers of variants for vectors and the like, this will just give a small
 // taste
 
-impl EveryVariant for String {
-    fn every_variant() -> Vec<Self> {
-        vec!["example String".into()]
-    }
+macro_rules! std_impl {
+    ($ty: ty, $($vals: expr),+) => {
+        impl EveryVariant for $ty {
+            fn every_variant() -> Vec<Self> {
+                let vec = vec![
+                $(
+                    $vals,
+                )+
+                ];
+                vec
+            }
+        }
+    };
 }
 
-impl EveryVariant for &'static str {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec!["&static str!"];
-        vec
-    }
-}
+std_impl!((), ());
 
-impl EveryVariant for u32 {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec![32];
-        vec
-    }
-}
+std_impl!(String, "example String".into());
+std_impl!(&'static str, "&ŝtatic str!");
 
-impl EveryVariant for u64 {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec![64];
-        vec
-    }
-}
-impl EveryVariant for u16 {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec![16];
-        vec
-    }
-}
-impl EveryVariant for u8 {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec![8];
-        vec
-    }
-}
+std_impl!(u8, 8);
+std_impl!(u16, 16);
+std_impl!(u32, 32);
+std_impl!(u64, 64);
+std_impl!(u128, 128);
 
-impl EveryVariant for i32 {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec![-32];
-        vec
-    }
-}
+std_impl!(i8, -8);
+std_impl!(i16, -16);
+std_impl!(i32, -32);
+std_impl!(i64, -64);
+std_impl!(i128, -128);
 
-impl EveryVariant for i64 {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec![-64];
-        vec
-    }
-}
-impl EveryVariant for i16 {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec![-16];
-        vec
-    }
-}
-impl EveryVariant for i8 {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec![-8];
-        vec
-    }
-}
+std_impl!(f32, 32., -32.);
+std_impl!(f64, 32., -32.);
 
-impl EveryVariant for bool {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec![true, false];
-        vec
-    }
-}
+std_impl!(usize, 0, usize::MAX);
+std_impl!(bool, true, false);
 
-impl EveryVariant for usize {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec![usize::MAX];
-        vec
-    }
-}
+std_impl!(std::num::NonZeroU8, Self::new(8).unwrap());
+std_impl!(std::num::NonZeroU16, Self::new(16).unwrap());
+std_impl!(std::num::NonZeroU32, Self::new(32).unwrap());
+std_impl!(std::num::NonZeroU64, Self::new(64).unwrap());
+std_impl!(std::num::NonZeroU128, Self::new(128).unwrap());
 
-impl EveryVariant for f32 {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec![32.];
-        vec
-    }
-}
-impl EveryVariant for f64 {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec![64.];
-        vec
-    }
-}
-
-impl EveryVariant for std::num::NonZeroU8 {
-    fn every_variant() -> Vec<Self> {
-        let vec = vec![Self::new(4).unwrap()];
-        vec
-    }
-}
+std_impl!(
+    std::num::NonZeroI8,
+    Self::new(8).unwrap(),
+    Self::new(-8).unwrap()
+);
+std_impl!(
+    std::num::NonZeroI16,
+    Self::new(16).unwrap(),
+    Self::new(-16).unwrap()
+);
+std_impl!(
+    std::num::NonZeroI32,
+    Self::new(32).unwrap(),
+    Self::new(-32).unwrap()
+);
+std_impl!(
+    std::num::NonZeroI64,
+    Self::new(64).unwrap(),
+    Self::new(-64).unwrap()
+);
+std_impl!(
+    std::num::NonZeroI128,
+    Self::new(128).unwrap(),
+    Self::new(-128).unwrap()
+);
 
 impl<T: EveryVariant + Clone + Sized> EveryVariant for Option<T> {
     fn every_variant() -> Vec<Self> {
@@ -114,14 +85,6 @@ impl<T: EveryVariant + Clone + Sized> EveryVariant for Option<T> {
         let mut tvec = tvec.into_iter().map(|t| Some(t)).collect();
         vec.append(&mut tvec);
 
-        vec
-    }
-}
-
-impl EveryVariant for () {
-    fn every_variant() -> Vec<Self> {
-        let mut vec = Vec::new();
-        vec.push(());
         vec
     }
 }
