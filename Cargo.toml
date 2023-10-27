@@ -1,6 +1,6 @@
 [package]
 name = "every_variant"
-version = "0.4.4"
+version = "0.4.5"
 authors = ["Kristoffer Ödmark <kristoffer.odmark90@gmail.com>"]
 edition = "2018"
 description = """
@@ -23,6 +23,11 @@ every_variant_macro = {version = "0.3.1", path = "./every_variant_macro"}
 version = "0.7.0"
 optional = true
 
+[dependencies.uuid]
+version = "1.5"
+optional = true
+
 [features]
 default = []
 ev_heapless = ["heapless"]
+uuid = ["dep:uuid"]

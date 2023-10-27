@@ -13,3 +13,7 @@ pub trait EveryVariant: Sized {
 
 pub mod std_impl;
 pub use std_impl::*;
+#[cfg(feature = "uuid")]
+pub mod uuid;
+#[cfg(feature = "uuid")]
+pub use uuid::*;
